@@ -41,6 +41,13 @@ EOF
         echo "update dns: $DOMAIN_NAME -> $2"
         $CURL -X PUT "$API_URL/zones/$ZONE_ID/dns_records/$1" -d "$UPDATE_DATA" > /tmp/cloudflare-ddns.json
 }
+# get current IP
+get_dns_ip(){
+        RECS=$($CURL "$API_URL/zones/$ZONE_ID/dns_records?name=$DOMAIN_NAME")
+        IP=$(echo "$RECS" | sed -e 's/[{}]/\n/g' | sed -e 's/,/\n/g' | grep '"content":"' | cut -d'"' -f4)
+        echo $IP
+}
+
 IP_FILE='/dev/shm/lastip9745' # or in /tmp .etc
 ip_data_old=$(cat $IP_FILE 2> /dev/null) # for non-exist file,content is null
 if [ "$ip_data" == "$ip_data_old" ];then
@@ -55,5 +62,9 @@ if [ -z "$REC_ID" ] ; then
         echo "REC_ID=$REC_ID"
 fi
 update_dns "$REC_ID" "$ip_data"
-echo $ip_data > $IP_FILE # update the file
-
+cur_ip=$(get_dns_ip)
+if [ "$cur_ip"=="$ip_data" ];then
+        echo $ip_data > $IP_FILE # update the file
+else
+        echo 'update dns failed.'
+fi
