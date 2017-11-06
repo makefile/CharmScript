@@ -1,5 +1,8 @@
 #!/bin/bash
 # __author__ = fyk
+# script for updating the cloudflare DNS record of a host which has dynamic public IP.
+# Add this script to cron job or system network event dispatcher(such as script in /etc/NetworkManager/dispatcher.d) . 
+
 # get global ipv6 & ipv4 address,
 # note that both ipv6 & ipv4 addr may have more than 1.
 
@@ -16,6 +19,10 @@ fi
 ip6s=$(ip -6 addr |grep 'global'|grep -v 'tmpaddr'|awk '{print $2}'|sed 's/\/.*//')
 #for my own needs,i only use ipv6
 #ip4s=$(ip -4 a | grep global |awk '{print $2}')
+if [ -z "$ip6s" ] ;then
+        echo 'no ipv6 addr'
+		exit 0
+fi
 for ip in $ip6s;do
         ip_data=$ip
         break # only use first one
@@ -39,7 +46,7 @@ EOF
 )
         #"ttl": 1, # let it be Automatic
         echo "update dns: $DOMAIN_NAME -> $2"
-        $CURL -X PUT "$API_URL/zones/$ZONE_ID/dns_records/$1" -d "$UPDATE_DATA" > /tmp/cloudflare-ddns.json
+        $CURL -X PUT "$API_URL/zones/$ZONE_ID/dns_records/$1" -d "$UPDATE_DATA" > /dev/null # > /tmp/cloudflare-ddns.json
 }
 # get current IP
 get_dns_ip(){
