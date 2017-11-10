@@ -15,6 +15,7 @@ case "$STATUS" in
 				# msg logged to /va/log/syslog
                 logger "IP6_ADDRESS_0 = $IP6_ADDRESS_0"
                 /home/s05/fyk/ip/ipv6-dns.sh /home/s05/fyk/ip/dns.conf 2>&1  > /dev/null
-        *)
+        ;;
+		*)
         ;;
 esac
