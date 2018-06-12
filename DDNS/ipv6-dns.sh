@@ -16,7 +16,8 @@ else
 fi
 
 # grep -v to exclude temporary ipv6 privacy addr.
-ip6s=$(ip -6 addr |grep 'global'|grep -v 'tmpaddr'|awk '{print $2}'|sed 's/\/.*//')
+# ip6s=$(ip -6 addr |grep 'global'|grep -v 'tmpaddr'|awk '{print $2}'|sed 's/\/.*//')
+ip6s=$(ip -6 addr |grep 'global'|awk '{print $2}'|sed 's/\/.*//')
 #for my own needs,i only use ipv6
 #ip4s=$(ip -4 a | grep global |awk '{print $2}')
 if [ -z "$ip6s" ] ;then
@@ -66,7 +67,8 @@ if [ -z "$REC_ID" ] ; then
         RECS=$($CURL "$API_URL/zones/$ZONE_ID/dns_records?name=$DOMAIN_NAME")
         echo $RECS
         REC_ID=$(echo "$RECS" | sed -e 's/[{}]/\n/g' | sed -e 's/,/\n/g' | grep '"id":"' | cut -d'"' -f4)
-        echo "REC_ID=$REC_ID"
+        echo "write to conf: REC_ID=$REC_ID"
+        echo "REC_ID=$REC_ID" >> $1
 fi
 update_dns "$REC_ID" "$ip_data"
 cur_ip=$(get_dns_ip)
